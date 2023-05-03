@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,25 +10,29 @@ public class GameMnager : MonoBehaviour
     public GameObject discWhitePrefab;
     public GameObject SuquareInnerPrefab;
     public GameObject SuquareOuterPrefab;
-    public GameObject discblackPrefab;
+    public GameObject discBlackPrefab;
+
+    //プレハブ追跡用
+    GameObject[,] obj = new GameObject[8, 8];
 
     //ポインタの位置格納用
     public Vector2 nowPointer;
 
     //盤面情報格納用
-    //1はBlack、2はWhite
-    public int[,] boad = new int[8, 8];
+    //1はBlack、-1はWhite
+    public int[,] boad = new int[9, 9];
 
     //ターン格納用
-    //1はBlack、2はWhite
-    public int turn = 1;
+    //1はBlack、-1はWhite
+    public int turn = 0;
+
+    //画面更新用
+    public int layer = 5;
 
     // Start is called before the first frame update
     void Start()
     {
-        setDiscStartPosition();
         setBoadStartPositon();
-        setPointerStsrtPosition();
     }
 
     // Update is called once per frame
@@ -60,9 +65,9 @@ public class GameMnager : MonoBehaviour
             movePointer(-10, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && discSetable())
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            setNewDisc();
+            changeDisc();
         }
     }
 
@@ -91,89 +96,153 @@ public class GameMnager : MonoBehaviour
         //初期盤面をboadに格納
         boad[3, 3] = 1;
         boad[4, 4] = 1;
-        boad[3, 4] = 2;
-        boad[4, 3] = 2;
+        boad[3, 4] = -1;
+        boad[4, 3] = -1;
 
-    }
-    void setDiscStartPosition()
-    {
+        //pointerを取得
+        GameObject pointer = GameObject.Find("pointer");
+
+        //pointerの位置初期化
+        pointer.transform.position = new Vector2(0, 0);
+
         //discを取得
         GameObject discBlack = GameObject.Find("discBlack");
         GameObject discWhite = GameObject.Find("discWhite");
 
-        //位置初期化
-        discBlack.transform.position = new Vector2(0, -10);
-        discWhite.transform.position = new Vector2(0, -10);
+        //discの位置の初期化
+        discBlack.transform.position = new Vector2(0, 80);
+        discWhite.transform.position = new Vector2(0, 80);
 
-        //開始位置にセット
-        Instantiate(discblackPrefab, new Vector2(30, 30), Quaternion.identity);
-        Instantiate(discblackPrefab, new Vector2(40, 40), Quaternion.identity);
-        Instantiate(discWhitePrefab, new Vector2(30, 40), Quaternion.identity);
-        Instantiate(discWhitePrefab, new Vector2(40, 30), Quaternion.identity);
+        //discを描画
+        drawBoad();
+
+        //ターンを初期化
+        turn = 1;
+
     }
 
-    void setPointerStsrtPosition()
-    {
-        //pointerを取得
-        GameObject pointer = GameObject.Find("pointer");
-
-        //位置初期化
-        pointer.transform.position = new Vector2 (0, 0);
-    }
-
-    void movePointer(float x,float y)
+    void movePointer(float x, float y)
     {
         //pointerを取得
         GameObject pointer = GameObject.Find("pointer");
 
         //合成元のベクトルを取得
-        Vector2 addVector = new Vector2 (x,y);
+        Vector2 addVector = new Vector2(x, y);
 
         //ポインターの位置を変更
-        pointer.transform.position = nowPointer+ addVector;
+        pointer.transform.position = nowPointer + addVector;
 
-        
+
+    }
+   
+    void changeDisc() //コマを置けるか判定し、置けるなら挟まれた敵コマをひっくり返す
+    {
+        int able = 0;
+
+        //８方向全てに対して
+        for (int i = 0;i < 8; i++)
+        {
+            //盤のそとに出ない限り
+            for (int j = 0;j <= giveMax(i);j++) 
+            {
+                //隣に敵コマがあり、現在のpointerの位置に石がなく、そこを起点にして、その方向に味方のコマJがあれば
+                if (boad[(int)nowPointer.x / 10 + j * (int)giveDirection(i).x, (int)nowPointer.y / 10 + j * (int)giveDirection(i).y] == turn 
+                    && boad[(int)nowPointer.x/10,(int)nowPointer.y/10] == 0 
+                    && boad[(int)nowPointer.x/10 + (int)giveDirection(i).x,(int)nowPointer.y/10 + (int)giveDirection(i).y] == -1 * turn)
+                {
+                    //現在のpointerの位置に味方のコマNPを置き
+                    boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
+
+                    //JとNPよってに挟まれる敵コマをひっくり返す
+                    for (int k= 1; k < j;k++)
+                    {
+                        boad[(int)nowPointer.x/10 + k*(int)giveDirection(i).x,(int)nowPointer.y/10 + k*(int)giveDirection(i).y] = turn;
+
+                        able = 1;
+                    }
+                }
+            }
+        }
+
+        if(able == 1) { turn *= -1; }
+
+        drawBoad();
+    }
+    void drawBoad() //boadに記録された盤面を描画する
+    {
+        //discを取得
+        GameObject discBlack = GameObject.Find("discBlack");
+        GameObject discWhite = GameObject.Find("discWhite");
+
+        //描画の初期化
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                Destroy(obj[i, j]);
+            }
+        }
+
+        //boadに保存された盤面を描画
+        for (int i = 0; i < 8; i++)
+        {
+            for(int j = 0; j < 8; j++)
+            {
+                if (boad[i,j] == 1) 
+                {
+                    obj[i,j] = Instantiate(discBlack, new Vector2(i * 10, j * 10), Quaternion.identity);
+                }else if(boad[i, j] == -1)
+                {
+                    obj[i,j] = Instantiate(discWhite, new Vector2(i * 10, j * 10), Quaternion.identity);
+                }
+            }
+        }
     }
 
-    void setNewDisc()
+    Vector2 giveDirection(int i)
     {
-        //pointerを取得
-        GameObject pointer = GameObject.Find("pointer");
-
-        //discを追加するベクトルを指定
-        Vector2 setVector = pointer.transform.position;
-
-        //ターンを判定
-        if(turn == 1)
+        Vector2 direction = new Vector2(0,0);
+        switch (i)
         {
-            //discを生成
-            Instantiate(discblackPrefab, setVector, Quaternion.identity);
-
-            //ターンを変更
-            turn = 2;
-
-            //盤面を更新
-            boad[(int)nowPointer.x/10,(int)nowPointer.y/10] = 1;
+            case 0:
+                direction = new Vector2(1,0); break;
+            case 1:
+                direction = new Vector2(1,1); break;
+            case 2:
+                direction = new Vector2(0,1); break;
+            case 3:
+                direction = new Vector2(-1,1); break;
+            case 4:
+                direction = new Vector2(-1,0); break;
+            case 5:
+                direction = new Vector2(-1,-1);break;
+            case 6:
+                direction = new Vector2(0,-1);break;
+            case 7:
+                direction = new Vector2(1,-1); break;
         }
-        else
-        {
-            //discを変更
-            Instantiate(discWhitePrefab, setVector, Quaternion.identity);
-
-            //ターンを変更
-            turn = 1;
-
-            //盤面を更新
-            boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = 2;
-        }
+        return direction;
     }
 
-    bool discSetable()
+    int giveMax(int i)
     {
-        bool discSetable = true;
+        int max = 0;
 
-        if (boad[(int)nowPointer.x/10,(int)nowPointer.y/10] == 0) { } else { discSetable = false; }
+        //最大でも８以下のjを１から１づつ増やしていき
+        for (int j = 1;j < 9; j++)
+        {
+            //あるjに対して、現在位置から与えられた方向iへjだけ離れた位置をtestとし、
+            Vector2 test = nowPointer / 10 + j * giveDirection(i);
 
-        return discSetable;
+            //testが盤の内部にない場合、
+            if(!((int)test.x >= 0 && (int)test.x <= 7 && (int)test.y >= 0 && (int)test.y <= 7))
+            {
+                max = j - 1;
+                break;
+            }
+        }
+
+        //maxを返す
+        return max;
     }
 }
