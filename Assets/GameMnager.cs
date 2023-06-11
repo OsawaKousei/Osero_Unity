@@ -8,6 +8,12 @@ using UnityEngine.UIElements;
 
 public class GameMnager : MonoBehaviour
 {
+
+    [Header("SE")] public AudioClip SP;
+    [Header("SE2")] public AudioClip MP;
+
+    private AudioSource audioSource = null;
+
     //プレハブ格納
     public GameObject discWhitePrefab;
     public GameObject SuquareInnerPrefab;
@@ -40,6 +46,7 @@ public class GameMnager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         setBoadStartPositon();
     }
 
@@ -64,21 +71,25 @@ public class GameMnager : MonoBehaviour
         //キー入力を取得
         if (Input.GetKeyDown(KeyCode.UpArrow) && nowPointer.y < 70)
         {
+            playSE(MP);
             movePointer(0, 10);
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow) && 0 < nowPointer.y)
         {
+            playSE(MP);
             movePointer(0, -10);
         }
 
         if (Input.GetKeyDown(KeyCode.RightArrow) && nowPointer.x < 70)
         {
+            playSE(MP);
             movePointer(10, 0);
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow) && 0 < nowPointer.x)
         {
+            playSE(MP);
             movePointer(-10, 0);
         }
 
@@ -88,6 +99,10 @@ public class GameMnager : MonoBehaviour
         }
     }
 
+    public void playSE(AudioClip clip)
+    {
+        audioSource.PlayOneShot(clip);
+    }
     void setBoadStartPositon()
     {
         //8x8の盤面を作る二重ループ
@@ -182,8 +197,8 @@ public class GameMnager : MonoBehaviour
         if(able == 1) {
             //現在のpointerの位置に味方のコマNPを置き
             boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
-
             turn *= -1;
+            playSE(SP);
         }
 
         drawBoad();
