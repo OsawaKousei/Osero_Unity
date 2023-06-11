@@ -278,8 +278,12 @@ MonoBehaviour:
   SuquareInnerPrefab: {fileID: 3578602561769984666, guid: f8af67e4e61ebe1479a89ac653f348cf, type: 3}
   SuquareOuterPrefab: {fileID: 7523352886331927474, guid: 31c012f1eba94724b8f6c7cfb8343023, type: 3}
   discBlackPrefab: {fileID: 537543731855313426, guid: 2b95321f9711983488a82c1fef012488, type: 3}
+  text: {fileID: 0}
   nowPointer: {x: 0, y: 0}
+  blackCount: 0
+  whiteCount: 0
   turn: 0
+  layer: 5
 --- !u!4 &765204338
 Transform:
   m_ObjectHideFlags: 0
