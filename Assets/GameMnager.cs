@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class GameMnager : MonoBehaviour
@@ -12,6 +13,8 @@ public class GameMnager : MonoBehaviour
     public GameObject SuquareOuterPrefab;
     public GameObject discBlackPrefab;
 
+    public Text text;
+
     //プレハブ追跡用
     GameObject[,] obj = new GameObject[8, 8];
 
@@ -21,6 +24,10 @@ public class GameMnager : MonoBehaviour
     //盤面情報格納用
     //1はBlack、-1はWhite
     public int[,] boad = new int[9, 9];
+
+    //勝敗判定用
+    public int blackCount = 0;
+    public int whiteCount = 0;
 
     //ターン格納用
     //1はBlack、-1はWhite
@@ -163,15 +170,19 @@ public class GameMnager : MonoBehaviour
         }
 
         if(able == 1) {
-            turn *= -1;
             //現在のpointerの位置に味方のコマNPを置き
             boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
+
+            turn *= -1;
         }
 
         drawBoad();
     }
     void drawBoad() //boadに記録された盤面を描画する
     {
+        blackCount = 0;
+        whiteCount = 0;
+
         //discを取得
         GameObject discBlack = GameObject.Find("discBlack");
         GameObject discWhite = GameObject.Find("discWhite");
@@ -193,12 +204,15 @@ public class GameMnager : MonoBehaviour
                 if (boad[i,j] == 1) 
                 {
                     obj[i,j] = Instantiate(discBlack, new Vector2(i * 10, j * 10), Quaternion.identity);
+                    blackCount++;
                 }else if(boad[i, j] == -1)
                 {
                     obj[i,j] = Instantiate(discWhite, new Vector2(i * 10, j * 10), Quaternion.identity);
+                    whiteCount++;
                 }
             }
         }
+        text.text = "blackScore" + blackCount + "\r\n" + "whiteScore" + whiteCount;
     }
 
     Vector2 giveDirection(int i)
