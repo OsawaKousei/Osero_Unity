@@ -150,8 +150,6 @@ public class GameMnager : MonoBehaviour
                     && boad[(int)nowPointer.x/10,(int)nowPointer.y/10] == 0 
                     && boad[(int)nowPointer.x/10 + (int)giveDirection(i).x,(int)nowPointer.y/10 + (int)giveDirection(i).y] == -1 * turn)
                 {
-                    //現在のpointerの位置に味方のコマNPを置き
-                    boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
 
                     //JとNPよってに挟まれる敵コマをひっくり返す
                     for (int k= 1; k < j;k++)
@@ -164,7 +162,11 @@ public class GameMnager : MonoBehaviour
             }
         }
 
-        if(able == 1) { turn *= -1; }
+        if(able == 1) {
+            turn *= -1;
+            //現在のpointerの位置に味方のコマNPを置き
+            boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
+        }
 
         drawBoad();
     }
