@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class GameMnager : MonoBehaviour
@@ -45,6 +46,15 @@ public class GameMnager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (blackCount + whiteCount >= 64) {
+            if (blackCount > whiteCount)
+            {
+                SceneManager.LoadScene("blackWin");
+            }
+            else {
+                SceneManager.LoadScene("whiteWin");
+            }
+        }
         //pointerを取得
         GameObject pointer = GameObject.Find("pointer");
 
