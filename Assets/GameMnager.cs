@@ -33,7 +33,7 @@ public class GameMnager : MonoBehaviour
     public int[,] boad = new int[9, 9];
 
     //勝敗判定用
-    public int blackCount = 0;
+    public int blackCount = 1;
     public int whiteCount = 0;
 
     //ターン格納用
@@ -53,12 +53,14 @@ public class GameMnager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (blackCount + whiteCount >= 64) {
+        if (blackCount + whiteCount >= 64)
+        {
             if (blackCount > whiteCount)
             {
                 SceneManager.LoadScene("blackWin");
             }
-            else {
+            else
+            {
                 SceneManager.LoadScene("whiteWin");
             }
         }
@@ -166,27 +168,27 @@ public class GameMnager : MonoBehaviour
 
 
     }
-   
+
     void changeDisc() //コマを置けるか判定し、置けるなら挟まれた敵コマをひっくり返す
     {
         int able = 0;
 
         //８方向全てに対して
-        for (int i = 0;i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             //盤のそとに出ない限り
-            for (int j = 0;j <= giveMax(i);j++) 
+            for (int j = 0; j <= giveMax(i); j++)
             {
                 //隣に敵コマがあり、現在のpointerの位置に石がなく、そこを起点にして、その方向に味方のコマJがあれば
-                if (boad[(int)nowPointer.x / 10 + j * (int)giveDirection(i).x, (int)nowPointer.y / 10 + j * (int)giveDirection(i).y] == turn 
-                    && boad[(int)nowPointer.x/10,(int)nowPointer.y/10] == 0 
-                    && boad[(int)nowPointer.x/10 + (int)giveDirection(i).x,(int)nowPointer.y/10 + (int)giveDirection(i).y] == -1 * turn)
+                if (boad[(int)nowPointer.x / 10 + j * (int)giveDirection(i).x, (int)nowPointer.y / 10 + j * (int)giveDirection(i).y] == turn
+                    && boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] == 0
+                    && boad[(int)nowPointer.x / 10 + (int)giveDirection(i).x, (int)nowPointer.y / 10 + (int)giveDirection(i).y] == -1 * turn)
                 {
 
                     //JとNPよってに挟まれる敵コマをひっくり返す
-                    for (int k= 1; k < j;k++)
+                    for (int k = 1; k < j; k++)
                     {
-                        boad[(int)nowPointer.x/10 + k*(int)giveDirection(i).x,(int)nowPointer.y/10 + k*(int)giveDirection(i).y] = turn;
+                        boad[(int)nowPointer.x / 10 + k * (int)giveDirection(i).x, (int)nowPointer.y / 10 + k * (int)giveDirection(i).y] = turn;
 
                         able = 1;
                     }
@@ -194,7 +196,8 @@ public class GameMnager : MonoBehaviour
             }
         }
 
-        if(able == 1) {
+        if (able == 1)
+        {
             //現在のpointerの位置に味方のコマNPを置き
             boad[(int)nowPointer.x / 10, (int)nowPointer.y / 10] = turn;
             turn *= -1;
@@ -224,15 +227,16 @@ public class GameMnager : MonoBehaviour
         //boadに保存された盤面を描画
         for (int i = 0; i < 8; i++)
         {
-            for(int j = 0; j < 8; j++)
+            for (int j = 0; j < 8; j++)
             {
-                if (boad[i,j] == 1) 
+                if (boad[i, j] == 1)
                 {
-                    obj[i,j] = Instantiate(discBlack, new Vector2(i * 10, j * 10), Quaternion.identity);
+                    obj[i, j] = Instantiate(discBlack, new Vector2(i * 10, j * 10), Quaternion.identity);
                     blackCount++;
-                }else if(boad[i, j] == -1)
+                }
+                else if (boad[i, j] == -1)
                 {
-                    obj[i,j] = Instantiate(discWhite, new Vector2(i * 10, j * 10), Quaternion.identity);
+                    obj[i, j] = Instantiate(discWhite, new Vector2(i * 10, j * 10), Quaternion.identity);
                     whiteCount++;
                 }
             }
@@ -242,25 +246,25 @@ public class GameMnager : MonoBehaviour
 
     Vector2 giveDirection(int i)
     {
-        Vector2 direction = new Vector2(0,0);
+        Vector2 direction = new Vector2(0, 0);
         switch (i)
         {
             case 0:
-                direction = new Vector2(1,0); break;
+                direction = new Vector2(1, 0); break;
             case 1:
-                direction = new Vector2(1,1); break;
+                direction = new Vector2(1, 1); break;
             case 2:
-                direction = new Vector2(0,1); break;
+                direction = new Vector2(0, 1); break;
             case 3:
-                direction = new Vector2(-1,1); break;
+                direction = new Vector2(-1, 1); break;
             case 4:
-                direction = new Vector2(-1,0); break;
+                direction = new Vector2(-1, 0); break;
             case 5:
-                direction = new Vector2(-1,-1);break;
+                direction = new Vector2(-1, -1); break;
             case 6:
-                direction = new Vector2(0,-1);break;
+                direction = new Vector2(0, -1); break;
             case 7:
-                direction = new Vector2(1,-1); break;
+                direction = new Vector2(1, -1); break;
         }
         return direction;
     }
@@ -270,13 +274,13 @@ public class GameMnager : MonoBehaviour
         int max = 0;
 
         //最大でも８以下のjを１から１づつ増やしていき
-        for (int j = 1;j < 9; j++)
+        for (int j = 1; j < 9; j++)
         {
             //あるjに対して、現在位置から与えられた方向iへjだけ離れた位置をtestとし、
             Vector2 test = nowPointer / 10 + j * giveDirection(i);
 
             //testが盤の内部にない場合、
-            if(!((int)test.x >= 0 && (int)test.x <= 7 && (int)test.y >= 0 && (int)test.y <= 7))
+            if (!((int)test.x >= 0 && (int)test.x <= 7 && (int)test.y >= 0 && (int)test.y <= 7))
             {
                 max = j - 1;
                 break;
